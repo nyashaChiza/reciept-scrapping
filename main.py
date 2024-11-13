@@ -1,7 +1,9 @@
 # Usage example
-from src.scrap import ReceiptScraper
+from dashboard.helpers import ReceiptScraper, ReceiptProcessor
 
 
 scraper = ReceiptScraper("files/1.jpg")
 text = scraper.extract_receipt_text()
-print(text)
+
+processor = ReceiptProcessor(text)
+processor.process_receipt()
