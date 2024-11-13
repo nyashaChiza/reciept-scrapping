@@ -25204,7 +25204,7 @@ dl li {
   color: #9c9fa6;
   padding-left: 24px;
   padding-right: 24px;
-  width: calc(100% - 260px);
+  width: 100%;
   height: 70px;
 }
 @media (max-width: 991px) {
@@ -26265,7 +26265,7 @@ dl li {
 
 .main-panel {
   transition: width 0.25s ease, margin 0.25s ease;
-  width: calc(100% - 260px);
+  width: 100%;
   min-height: calc(100vh - 70px);
   display: -webkit-flex;
   display: flex;
