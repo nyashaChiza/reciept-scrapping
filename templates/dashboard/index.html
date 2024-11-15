@@ -6,7 +6,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Purple Admin</title>
+    <title>Nyasha Chizampeni</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/ti-icons/css/themify-icons.css' %}">
@@ -42,11 +42,13 @@
               </h3>
               <nav aria-label="breadcrumb">
                 <ul class="breadcrumb">
-                  <li class="breadcrumb-item active" aria-current="page">
-                    
-                      <button type="button" class="btn btn-outline-danger btn-icon-text " data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        Add Reciept 
-                      </button>
+                  
+                  <li>
+                    <form id="filterForm" style="display: flex; gap: 10px;">
+                      <input type="number" id="year" name="year" class="form-control form-control-outlined" value="{{ year }}" placeholder="Enter Year">
+                      <input type="submit" value="Filter" class="btn btn-primary">
+                  </form>
+                  
                   </li>
                 </ul>
               </nav>
@@ -56,10 +58,10 @@
                 <div class="card bg-gradient-danger card-img-holder text-white">
                   <div class="card-body">
                     <img src="{% static 'assets/images/dashboard/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
-                    <h4 class="font-weight-normal mb-3">Weekly Sales <i class="mdi mdi-chart-line mdi-24px float-end"></i>
+                    <h4 class="font-weight-normal mb-3">Cash Payments <i class="mdi mdi-chart-line mdi-24px float-end"></i>
                     </h4>
-                    <h2 class="mb-5">$ 15,0000</h2>
-                    <h6 class="card-text">Increased by 60%</h6>
+                    <h2 class="mb-5">${{ cash_total }}</h2>
+                    
                   </div>
                 </div>
               </div>
@@ -67,10 +69,10 @@
                 <div class="card bg-gradient-info card-img-holder text-white">
                   <div class="card-body">
                     <img src="{% static 'assets/images/dashboard/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
-                    <h4 class="font-weight-normal mb-3">Weekly Orders <i class="mdi mdi-bookmark-outline mdi-24px float-end"></i>
+                    <h4 class="font-weight-normal mb-3">Card Payments <i class="mdi mdi-bookmark-outline mdi-24px float-end"></i>
                     </h4>
-                    <h2 class="mb-5">45,6334</h2>
-                    <h6 class="card-text">Decreased by 10%</h6>
+                    <h2 class="mb-5">${{ card_total }}</h2>
+                    
                   </div>
                 </div>
               </div>
@@ -78,10 +80,10 @@
                 <div class="card bg-gradient-success card-img-holder text-white">
                   <div class="card-body">
                     <img src="{% static 'assets/images/dashboard/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
-                    <h4 class="font-weight-normal mb-3">Visitors Online <i class="mdi mdi-diamond mdi-24px float-end"></i>
+                    <h4 class="font-weight-normal mb-3">Other Payments <i class="mdi mdi-diamond mdi-24px float-end"></i>
                     </h4>
-                    <h2 class="mb-5">95,5741</h2>
-                    <h6 class="card-text">Increased by 5%</h6>
+                    <h2 class="mb-5">${{ other_total }}</h2>
+                    
                   </div>
                 </div>
               </div>
@@ -91,7 +93,7 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="clearfix">
-                      <h4 class="card-title float-start">Visit And Sales Statistics</h4>
+                      <h4 class="card-title float-start">Sales</h4>
                       <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-end"></div>
                     </div>
                     <canvas id="visit-sale-chart" class="mt-4"></canvas>
@@ -101,7 +103,7 @@
               <div class="col-md-5 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Traffic Sources</h4>
+                    <h4 class="card-title">Payment Types</h4>
                     <div class="doughnutjs-wrapper d-flex justify-content-center">
                       <canvas id="traffic-chart"></canvas>
                     </div>
@@ -114,33 +116,34 @@
               <div class="col-12 grid-margin">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Recent Tickets</h4>
+                    <h4 class="card-title">Receipts</h4>
                     <div class="table-responsive">
                       <table class="table">
                         <thead>
                           <tr>
-                            <th> Assignee </th>
-                            <th> Subject </th>
-                            <th> Status </th>
-                            <th> Last Update </th>
-                            <th> Tracking ID </th>
+                            <th> Store </th>
+                            <th> Payment Type </th>
+                            <th> Number of Items </th>
+                            <th> Total Cost </th>
+                            <th> Date </th>
                           </tr>
                         </thead>
                         <tbody>
                           
                           
-                          
+                          {% for receipt in receipts %}
                           <tr>
                             <td>
-                               John Doe
+                               {{ receipt.store_name }}
                             </td>
-                            <td> Loosing control on server </td>
+                            <td> {{ receipt.payment_type }} </td>
                             <td>
-                              <label class="badge badge-gradient-danger">REJECTED</label>
+                              {{ receipt.items.count }}
                             </td>
-                            <td> Dec 3, 2017 </td>
-                            <td> WD-12348 </td>
+                            <td> ${{ receipt.get_total }} </td>
+                            <td> {{ receipt.transaction_date }} </td>
                           </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
@@ -197,8 +200,204 @@
     <script src="{% static 'assets/js/jquery.cookie.js' %}"></script>
     <!-- endinject -->
     <!-- Custom js for this page -->
-    <script src="{% static 'assets/js/dashboard.js' %}"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <!-- End custom js for this page -->
+    <script>
+      (function ($) {
+  'use strict';
+  if ($("#visit-sale-chart").length) {
+    const ctx = document.getElementById('visit-sale-chart');
+
+    var graphGradient1 = document.getElementById('visit-sale-chart').getContext("2d");
+    var graphGradient2 = document.getElementById('visit-sale-chart').getContext("2d");
+    var graphGradient3 = document.getElementById('visit-sale-chart').getContext("2d");
+
+    var gradientStrokeViolet = graphGradient1.createLinearGradient(0, 0, 0, 181);
+    gradientStrokeViolet.addColorStop(0, 'rgba(218, 140, 255, 1)');
+    gradientStrokeViolet.addColorStop(1, 'rgba(154, 85, 255, 1)');
+    var gradientLegendViolet = 'linear-gradient(to right, rgba(218, 140, 255, 1), rgba(154, 85, 255, 1))';
+
+    var gradientStrokeBlue = graphGradient2.createLinearGradient(0, 0, 0, 360);
+    gradientStrokeBlue.addColorStop(0, 'rgba(54, 215, 232, 1)');
+    gradientStrokeBlue.addColorStop(1, 'rgba(177, 148, 250, 1)');
+    var gradientLegendBlue = 'linear-gradient(to right, rgba(54, 215, 232, 1), rgba(177, 148, 250, 1))';
+
+    var gradientStrokeRed = graphGradient3.createLinearGradient(0, 0, 0, 300);
+    gradientStrokeRed.addColorStop(0, 'rgba(255, 191, 150, 1)');
+    gradientStrokeRed.addColorStop(1, 'rgba(254, 112, 150, 1)');
+    var gradientLegendRed = 'linear-gradient(to right, rgba(255, 191, 150, 1), rgba(254, 112, 150, 1))';
+    const bgColor1 = ["rgba(218, 140, 255, 1)"];
+    const bgColor2 = ["rgba(54, 215, 232, 1"];
+    const bgColor3 = ["rgba(255, 191, 150, 1)"];
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ graph_y_values|safe }},
+        datasets: [{
+          label: "Monthly Sales",
+          borderColor: gradientStrokeViolet,
+          backgroundColor: gradientStrokeViolet,
+          fillColor: bgColor1,
+          hoverBackgroundColor: gradientStrokeViolet,
+          pointRadius: 0,
+          fill: false,
+          borderWidth: 1,
+          fill: 'origin',
+          data: {{ graph_x_values }},
+          barPercentage: 0.5,
+          categoryPercentage: 0.5,
+        },
+        
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        elements: {
+          line: {
+            tension: 0.4,
+          },
+        },
+        scales: {
+          y: {
+            display: false,
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+            },
+          },
+          x: {
+            display: true,
+            grid: {
+              display: false,
+            },
+          }
+        },
+        plugins: {
+          legend: {
+            display: false,
+          }
+        }
+      },
+      plugins: [{
+        afterDatasetUpdate: function (chart, args, options) {
+          const chartId = chart.canvas.id;
+          var i;
+          const legendId = `${chartId}-legend`;
+          const ul = document.createElement('ul');
+          for (i = 0; i < chart.data.datasets.length; i++) {
+            ul.innerHTML += `
+              <li>
+                <span style="background-color: ${chart.data.datasets[i].fillColor}"></span>
+                ${chart.data.datasets[i].label}
+              </li>
+            `;
+          }
+          // alert(chart.data.datasets[0].backgroundColor);
+          return document.getElementById(legendId).appendChild(ul);
+        }
+      }]
+    });
+  }
+
+  if ($("#traffic-chart").length) {
+    const ctx = document.getElementById('traffic-chart');
+
+    var graphGradient1 = document.getElementById("traffic-chart").getContext('2d');
+    var graphGradient2 = document.getElementById("traffic-chart").getContext('2d');
+    var graphGradient3 = document.getElementById("traffic-chart").getContext('2d');
+
+    var gradientStrokeBlue = graphGradient1.createLinearGradient(0, 0, 0, 181);
+    gradientStrokeBlue.addColorStop(0, 'rgba(54, 215, 232, 1)');
+    gradientStrokeBlue.addColorStop(1, 'rgba(177, 148, 250, 1)');
+    var gradientLegendBlue = 'rgba(54, 215, 232, 1)';
+
+    var gradientStrokeRed = graphGradient2.createLinearGradient(0, 0, 0, 50);
+    gradientStrokeRed.addColorStop(0, 'rgba(255, 191, 150, 1)');
+    gradientStrokeRed.addColorStop(1, 'rgba(254, 112, 150, 1)');
+    var gradientLegendRed = 'rgba(254, 112, 150, 1)';
+
+    var gradientStrokeGreen = graphGradient3.createLinearGradient(0, 0, 0, 300);
+    gradientStrokeGreen.addColorStop(0, 'rgba(6, 185, 157, 1)');
+    gradientStrokeGreen.addColorStop(1, 'rgba(132, 217, 210, 1)');
+    var gradientLegendGreen = 'rgba(6, 185, 157, 1)';
+
+    // const bgColor1 = ["rgba(54, 215, 232, 1)"];
+    // const bgColor2 = ["rgba(255, 191, 150, 1"];
+    // const bgColor3 = ["rgba(6, 185, 157, 1)"];
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Cash Payments', 'Card Payments', 'Other Payments'],
+        datasets: [{
+          data: {{ donut_values }},
+          backgroundColor: [gradientStrokeBlue, gradientStrokeGreen, gradientStrokeRed],
+          hoverBackgroundColor: [
+            gradientStrokeBlue,
+            gradientStrokeGreen,
+            gradientStrokeRed
+          ],
+          borderColor: [
+            gradientStrokeBlue,
+            gradientStrokeGreen,
+            gradientStrokeRed
+          ],
+          legendColor: [
+            gradientLegendBlue,
+            gradientLegendGreen,
+            gradientLegendRed
+          ]
+        }]
+      },
+      options: {
+        cutout: 50,
+        animationEasing: "easeOutBounce",
+        animateRotate: true,
+        animateScale: false,
+        responsive: true,
+        maintainAspectRatio: true,
+        showScale: true,
+        legend: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        }
+      },
+      plugins: [{
+        afterDatasetUpdate: function (chart, args, options) {
+          const chartId = chart.canvas.id;
+          var i;
+          const legendId = `${chartId}-legend`;
+          const ul = document.createElement('ul');
+          for (i = 0; i < chart.data.datasets[0].data.length; i++) {
+            ul.innerHTML += `
+                <li>
+                  <span style="background-color: ${chart.data.datasets[0].legendColor[i]}"></span>
+                  ${chart.data.labels[i]}
+                </li>
+              `;
+          }
+          return document.getElementById(legendId).appendChild(ul);
+        }
+      }]
+    });
+  }
+
+
+
+  if ($("#inline-datepicker").length) {
+    $('#inline-datepicker').datepicker({
+      enableOnReadonly: true,
+      todayHighlight: true,
+    });
+  }
+
+})(jQuery);
+    </script>
   </body>
 </html>

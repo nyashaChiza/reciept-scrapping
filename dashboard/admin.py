@@ -13,8 +13,8 @@ class ReceiptItemInline(admin.TabularInline):
 
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display = ('store_name', 'transaction_date', 'payment_total', 'vat_amount', 'created', 'updated')
-    list_filter = ('transaction_date', 'store_name', 'card_type')
+    list_display = ('store_name', 'transaction_date', 'payment_type', 'vat_amount', 'created', 'updated')
+    list_filter = ('transaction_date', 'store_name', 'payment_type')
     search_fields = ('store_name', 'store_address', 'check_number', 'vat_number')
     readonly_fields = ('created', 'updated')
     inlines = [ReceiptItemInline]
@@ -24,7 +24,7 @@ class ReceiptAdmin(admin.ModelAdmin):
             'fields': ('store_name', 'store_address', 'store_postcode')
         }),
         ('Transaction Details', {
-            'fields': ('transaction_date', 'check_number', 'card_type', 'card_last_four_digits', 'payment_total', 'change_due')
+            'fields': ('transaction_date', 'check_number', 'payment_type', 'card_last_four_digits', 'payment_total', 'change_due')
         }),
         ('VAT Information', {
             'fields': ('vat_amount', 'vat_percentage', 'vat_number')

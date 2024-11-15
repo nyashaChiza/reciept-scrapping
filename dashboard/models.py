@@ -1,5 +1,11 @@
 from django.db import models
 
+TYPE_CHOICES = (
+    ('Card', 'Card'),
+    ('Cash', 'Cash'),
+    ('Other', 'Other')
+)
+
 class Receipt(models.Model):
     # Basic receipt information
     store_name = models.CharField(max_length=100, blank=True, null=True)
@@ -9,7 +15,7 @@ class Receipt(models.Model):
     
     # Transaction details
     check_number = models.CharField(max_length=20, blank=True, null=True)
-    card_type = models.CharField(max_length=20, blank=True, null=True)  # e.g., "Visa", "MasterCard"
+    payment_type = models.CharField(max_length=20, blank=True, null=True, choices = TYPE_CHOICES)  # e.g., "Visa", "MasterCard"
     card_last_four_digits = models.CharField(max_length=4, blank=True, null=True)
     payment_total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     change_due = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -25,6 +31,9 @@ class Receipt(models.Model):
     # Timestamps
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    def get_total(self):
+         return sum(item.total_price for item in self.items.all())
 
 
 
