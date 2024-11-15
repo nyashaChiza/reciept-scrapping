@@ -4,7 +4,7 @@
 This project utilizes Optical Character Recognition (OCR) to extract information from scanned receipts, processes the data using regular expressions (regex), and displays the results on a dashboard. The dashboard shows insights such as total sales, sales by payment type, and monthly sales trends.
 Here’s a demonstration of the project in action:
 
-![Demo JPG](dashbord.jpg)
+![Demo JPG](dashboard.jpg)
 ## Features
 
 - **OCR for Receipt Extraction**: Uses OCR to scan and extract data from receipt images.
