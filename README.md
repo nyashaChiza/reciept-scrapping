@@ -126,8 +126,8 @@ receipt-dashboard/
 │   │   ├── dashboard/
 │   │   │   ├── index.html      # Dashboard HTML with chart rendering
 │   ├── static/
-│       ├── js/
-│       │   └── chart.js        # JavaScript for rendering charts
+│       ├── assets/
+│       │           
 ├── manage.py                   # Django management script
 ├── requirements.txt            # Project dependencies
 └── README.md                   # This file
