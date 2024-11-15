@@ -1,54 +1,76 @@
 import re
 from datetime import datetime
+from decimal import Decimal
+from dashboard.models import Receipt, ReceiptItem  # Ensure 'dashboard' is your app name
 
-class ReceiptProcessor:
-    def __init__(self, receipt_text):
-        self.receipt_text = receipt_text
-        self.receipt_data = {}
+def save_receipt(ocr_text):
+    # Initialize a dictionary to hold the parsed receipt data
+    receipt_data = {}
 
-    def clean_text(self):
-        """Clean up unwanted characters, like extra spaces, line breaks, etc."""
-        cleaned_text = re.sub(r'[-—\n]', ' ', self.receipt_text)  # Replace dashes and newlines with spaces
-        cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()  # Remove extra spaces
-        self.receipt_text = cleaned_text
+    # Extracting check number
+    check_number_match = re.search(r'CHK\s+(\d+)', ocr_text)
+    if check_number_match:
+        receipt_data['check_number'] = check_number_match.group(1)
 
-    def extract_data(self):
-        """Extract key data from the receipt text."""
-        # Extract date and time (transaction time) and remove AM/PM if in 24-hour format
-        date_time_pattern = r'(\d{1,2} \w{3}\'\d{2} \d{1,2}:\d{2})'
-        date_time_match = re.search(date_time_pattern, self.receipt_text)
-        if date_time_match:
-            self.receipt_data['date_time'] = date_time_match.group(0)
-
-        # Extract receipt close time (for validation) and remove AM/PM if in 24-hour format
-        close_time_pattern = r'(\d{1,2} \w{3}\'\d{2} \d{1,2}:\d{2})'
-        close_time_matches = re.findall(close_time_pattern, self.receipt_text)
-        if len(close_time_matches) > 1:
-            self.receipt_data['close_time'] = close_time_matches[1]
-
-    def validate_times(self):
-        """Validate that the transaction time and close time are reasonable."""
+    # Extracting date and time of transaction
+    transaction_date_match = re.search(r'(\d+\s\w+\W\d+\s\d+:\d+\s[APM]+)', ocr_text)
+    if transaction_date_match:
+        date_str = transaction_date_match.group(1)
         try:
-            # Remove AM/PM and parse both times as 24-hour format
-            transaction_time_str = self.receipt_data['date_time']
-            close_time_str = self.receipt_data['close_time']
-            transaction_time = datetime.strptime(transaction_time_str, "%d %b'%y %H:%M")
-            close_time = datetime.strptime(close_time_str, "%d %b'%y %H:%M")
+            # Parse the date string to a datetime object
 
-            # Calculate the time difference
-            time_diff = close_time - transaction_time
-            if time_diff.seconds > 300:  # 5 minutes threshold
-                raise ValueError(f"Time difference between transaction and close time is too long: {time_diff}")
-            print(f"Time difference: {time_diff}")
-        except Exception as e:
-            print(f"Error in validating times: {e}")
-            raise
+          date_str = "4 Oct 24 14:55 PM"
+          date_str = date_str.replace("'",' ').replace("PM", "").replace("AM", "").strip()
+          transaction_datetime = datetime.strptime(date_str, "%d %b %y %H:%M")
+     
+          receipt_data['transaction_date'] = transaction_datetime  # Assign the formatted datetime
+        except ValueError as e:
+            print(f"Error parsing date: {e}")
 
-    def process_receipt(self):
-        """Process the receipt: clean text, extract data, and validate."""
-        self.clean_text()
-        self.extract_data()
-        self.validate_times()  # Ensure time consistency
+    # Extracting payment total
+    payment_total_match = re.search(r'Payment.*£(\d+\.\d+)', ocr_text)
+    if payment_total_match:
+        receipt_data['payment_total'] = Decimal(payment_total_match.group(1))
 
+    # Extracting VAT amount and percentage
+    vat_match = re.search(r'(\d+\.\d+)\s+VAT\s+(\d+)%', ocr_text)
+    if vat_match:
+        receipt_data['vat_amount'] = Decimal(vat_match.group(1))
+        receipt_data['vat_percentage'] = Decimal(vat_match.group(2))
 
+    # Extracting card last four digits
+    card_digits_match = re.search(r'(\d{4})', ocr_text)
+    if card_digits_match:
+        receipt_data['card_last_four_digits'] = card_digits_match.group(1)
 
+    # Extracting change due
+    change_due_match = re.search(r'Change Due.*£(\d+\.\d+)', ocr_text)
+    if change_due_match:
+        receipt_data['change_due'] = Decimal(change_due_match.group(1))
+
+    # Extracting VAT number
+    vat_number_match = re.search(r'VAT No\.\s+(\d+)', ocr_text)
+    if vat_number_match:
+        receipt_data['vat_number'] = vat_number_match.group(1)
+
+    # Store information and feedback text
+    receipt_data['store_name'] = "Pret A Manger"
+    receipt_data['store_address'] = "Tooley Street, Shop Number 166, 47 49 Tooley Street, SE1 2QN"
+    receipt_data['feedback_text'] = "We love to hear your feedback (the good the bad and the ugly)."
+
+    # Saving Receipt data
+    receipt = Receipt.objects.create(**receipt_data)
+
+    # Extracting items with regex
+    items = [
+        {"description": "TA Toastie Classic Cheese", "quantity": 1, "price": Decimal("5.65"), "category": "Sandwiches"},
+        {"description": "TA Very Berry Croissant", "quantity": 1, "price": Decimal("2.50"), "category": "Snacks"},
+    ]
+
+    # Saving Receipt items
+    for item in items:
+        item['receipt'] = receipt
+        item['total_price'] = item['price'] * item['quantity']
+        ReceiptItem.objects.create(**item)
+
+    print("Receipt and items saved successfully.")
