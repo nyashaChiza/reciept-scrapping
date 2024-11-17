@@ -29,10 +29,10 @@ Here’s a demonstration of the project in action:
 ### Prerequisites
 
 Ensure you have the following installed:
-- Python (>= 3.7)
-- Django (>= 3.0)
+- Python (>= 3.12)
+- Django (>= 5.0)
 - **Tesseract OCR** (see instructions below for installation)
-- Node.js (for frontend charting if needed)
+- Vanilla Javascript
 
 ### 1. Clone the Repository
 
@@ -126,8 +126,7 @@ receipt-dashboard/
 │   │   ├── dashboard/
 │   │   │   ├── index.html      # Dashboard HTML with chart rendering
 │   ├── static/
-│       ├── assets/
-│       │           
+│       ├── assets/          
 ├── manage.py                   # Django management script
 ├── requirements.txt            # Project dependencies
 └── README.md                   # This file
